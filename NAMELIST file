@@ -1,0 +1,112 @@
+!-------------------------------------------------------------------------------
+!-- INITIALIZATION PARAMETER NAMELIST
+!   Documentation: https://docs.palm-model.org/23.04/Reference/LES_Model/Namelists/#initialization-parameters
+!-------------------------------------------------------------------------------
+&initialization_parameters
+!
+!-- grid parameters
+!-------------------------------------------------------------------------------
+    nx                         = 1151, ! Number of gridboxes in x-direction (nx+1)
+    ny                         = 575, ! Number of gridboxes in y-direction (ny+1)
+    nz                         = 192, ! Number of gridboxes in z-direction (nz)
+
+    dx                         = 0.625, ! Size of single gridbox in x-direction
+    dy                         = 0.625, ! Size of single gridbox in y-direction
+    dz                         = 0.625, ! Size of single gridbox in z-direction
+!
+!-- initialization
+!-------------------------------------------------------------------------------
+    initializing_actions       = 'set_constant_profiles', ! initial conditions
+
+    ug_surface                 = 6., ! initial u-comp
+    vg_surface                 = 0.0, ! initial v-comp
+    passive_scalar        = .T.,
+
+!
+!-- physics
+!-------------------------------------------------------------------------------
+    omega                      = 0.0, ! no Coriolis force
+
+!
+!-- mode
+!-------------------------------------------------------------------------------
+    dp_external                = .T.,          ! use horizontal pressure gradient
+    dpdxy                      = -0.0007, 0.0,
+!
+!-- boundary conditions
+!-------------------------------------------------------------------------------
+    bc_uv_t                    = 'neumann', ! free-slip boundary condition
+    bc_s_b         = 'neumann',
+    bc_pt_b         = 'neumann',
+    roughness_length        = 0.01,
+!    y_shift         = 3,         ! left/right boundary
+    surface_scalarflux         = 0.0,
+    surface_heatflux           = 0.15,
+    wall_scalarflux(0)        = 0.02,
+    wall_heatflux(0)       = 0.15,! no cool roof 
+    wall_heatflux(1)           = 0.15,
+    wall_heatflux(2)           = 0.15,
+!
+    large_scale_subsidence = .T.,
+    subs_vertical_gradient = -1.5, 0.0,
+    subs_vertical_gradient_level = 0.,60.,
+
+!
+!-- numerics
+!-------------------------------------------------------------------------------
+    fft_method                 = 'temperton-algorithm', ! build-in fft method
+
+!
+!-- topography
+!-------------------------------------------------------------------------------
+    topography                 = 'read_from_file',  ! use input file
+                                                    ! to set topograph
+!-- misc
+!-------------------------------------------------------------------------------
+    restart_data_format =  'fortran_binary',!'mpi_shared_memory',
+
+/ ! end of initialization parameter namelist
+
+!-------------------------------------------------------------------------------
+!-- RUNTIME PARAMETER NAMELIST
+!   Documentation: https://docs.palm-model.org/23.04/Reference/LES_Model/Namelists/#runtime-parameters
+!-------------------------------------------------------------------------------
+&runtime_parameters
+!
+!-- run steering
+!-------------------------------------------------------------------------------
+    end_time                   = 25200.,!43200.0, ! simulation time of the 3D model
+    create_disturbances        = .T.,    ! randomly perturbate horiz. velocity
+    npex         = 48,
+    npey         = 24,
+    interpolate_to_grid_center  = .TRUE.,
+
+!
+!-- data output
+!-------------------------------------------------------------------------------
+    dt_run_control             =   1, ! output interval for run control
+    dt_data_output             = 600.0, ! output interval for general data
+    dt_max         = 0.1,
+    dt_dots                    =   0.1, ! output interval for time-series data
+    dt_dopr                    = 600., ! output interval for profile data
+    data_output                = 'u', 'u_av','theta','theta_av',!'s_xz','u_xz',
+                                 'v', 'v_av','s','s_av','ti','ti_av',!'ti_xz','theta_xz',
+                                 'w', 'w_av','p_av','wu_product_av','wv_product_av',  ! 2d and/
+                                               ! or 3d
+                                               ! output
+
+    data_output_pr             = '#u', 'u*2', 'wu', 'w*u*', 'w"u"',
+                                 '#v', 'v*2', 'wv', 'w*v*', 'w"v"',
+                                 'w', 'w*2','#theta',
+                                 'e', 'e*',
+                                 '#km',
+                                 '#l',      ! Profile
+                                            ! output
+
+    averaging_interval         = 600.0, ! averaging interval general data
+    dt_averaging_input         =    1.0, ! averaging general data sampling rate
+
+    averaging_interval_pr      =    600.0, ! averaging interval profile data
+    dt_averaging_input_pr      =    0.0, ! averaging profile data sampling rate
+
+/ ! end of runtime parameter namelist
